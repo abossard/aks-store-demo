@@ -23,7 +23,7 @@
     "fastify": "^4.0.0",
     "fastify-cli": "^4.4.0",
     "fastify-plugin": "^3.0.0",
-    "rhea": "^3.0.2"
+    "rhea": "^3.0.4"
   },
   "devDependencies": {
     "tap": "^16.1.0"
