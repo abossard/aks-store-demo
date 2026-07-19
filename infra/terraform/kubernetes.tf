@@ -68,6 +68,18 @@ module "aks" {
     } : null
   }
 
+  service_mesh_profile = local.deploy_istio ? {
+    mode = "Istio"
+    istio = {
+      components = {
+        ingress_gateways = [{
+          enabled = true
+          mode    = "External"
+        }]
+      }
+    }
+  } : null
+
   addon_profile_key_vault_secrets_provider = {
     enabled = true
     config = {
