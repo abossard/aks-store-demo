@@ -109,7 +109,9 @@ The following environment variables control what gets deployed:
 | `DEPLOY_AZURE_SERVICE_BUS`        | Set `true` to deploy Azure Service Bus (RabbitMQ disabled in app).                                                                                                 |
 | `DEPLOY_AZURE_COSMOSDB`           | Set `true` to deploy Azure Cosmos DB (DocumentDB disabled in app).                                                                                                 |
 | `AZURE_COSMOSDB_ACCOUNT_KIND`     | Cosmos DB API kind: `MongoDB` or `GlobalDocumentDB` (SQL API). Default: `GlobalDocumentDB`.                                                                        |
-| `DEPLOY_OBSERVABILITY_TOOLS`      | Set `true` to deploy Log Analytics, managed Prometheus, and enable Container Insights.                                                                             |
+| `DEPLOY_OBSERVABILITY_TOOLS`      | Set `true` to deploy Log Analytics, managed Prometheus, and enable Container Insights. Also enables Advanced Container Networking Services (ACNS) network observability so Cilium/Hubble metrics flow to managed Prometheus. |
+| `DEPLOY_NODE_AUTO_PROVISIONING`   | Set `true` to enable AKS node auto provisioning in Auto mode with the default NodePools. Default: `false`.                                                         |
+| `DEPLOY_ISTIO`                    | Set `true` to enable the managed Istio service mesh and external ingress gateway. With observability enabled, the deployment also collects `istio_*` gateway metrics. |
 | `SOURCE_REGISTRY`                 | Source container registry for images. Default: `ghcr.io/azure-samples`.                                                                                            |
 
 These environment variables listed above can be set with commands like this:
@@ -141,6 +143,12 @@ azd env set AZURE_COSMOSDB_ACCOUNT_KIND GlobalDocumentDB
 
 # deploys aks observability tools
 azd env set DEPLOY_OBSERVABILITY_TOOLS true
+
+# enables AKS node auto provisioning
+azd env set DEPLOY_NODE_AUTO_PROVISIONING true
+
+# enables managed Istio and its external ingress gateway
+azd env set DEPLOY_ISTIO true
 
 # set custom source registry (optional)
 azd env set SOURCE_REGISTRY ghcr.io/azure-samples

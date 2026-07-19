@@ -43,18 +43,42 @@ module "aks" {
   }
 
   default_agent_pool = {
-    vm_size = local.aks_node_pool_vm_size
+    vm_size             = local.aks_node_pool_vm_size
+    enable_auto_scaling = false
     upgrade_settings = {
       max_surge = "10%"
     }
   }
+
+  node_provisioning_profile = local.deploy_node_auto_provisioning ? {
+    default_node_pools = "Auto"
+    mode               = "Auto"
+  } : null
 
   network_profile = {
     network_plugin      = "azure"
     network_plugin_mode = "overlay"
     network_policy      = "cilium"
     network_dataplane   = "cilium"
+    advanced_networking = local.deploy_observability_tools ? {
+      enabled = true
+      observability = {
+        enabled = true
+      }
+    } : null
   }
+
+  service_mesh_profile = local.deploy_istio ? {
+    mode = "Istio"
+    istio = {
+      components = {
+        ingress_gateways = [{
+          enabled = true
+          mode    = "External"
+        }]
+      }
+    }
+  } : null
 
   addon_profile_key_vault_secrets_provider = {
     enabled = true
@@ -68,10 +92,12 @@ module "aks" {
   }
 
   azure_monitor_profile = local.deploy_observability_tools ? {
-    enabled = true
-    kube_state_metrics = {
-      metric_annotations_allow_list = "*"
-      metric_labels_allowlist       = "*"
+    metrics = {
+      enabled = true
+      kube_state_metrics = {
+        metric_annotations_allow_list = "*"
+        metric_labels_allowlist       = "*"
+      }
     }
   } : null
 
