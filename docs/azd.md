@@ -111,8 +111,10 @@ The following environment variables control what gets deployed:
 | `AZURE_COSMOSDB_ACCOUNT_KIND`     | Cosmos DB API kind: `MongoDB` or `GlobalDocumentDB` (SQL API). Default: `GlobalDocumentDB`.                                                                        |
 | `DEPLOY_OBSERVABILITY_TOOLS`      | Set `true` to deploy Log Analytics, managed Prometheus, and enable Container Insights. Also enables Advanced Container Networking Services (ACNS) network observability so Cilium/Hubble metrics flow to managed Prometheus. |
 | `DEPLOY_NODE_AUTO_PROVISIONING`   | Set `true` to enable AKS node auto provisioning in Auto mode with the default NodePools. With observability enabled, postdeploy safely enables the official AMA schema-v2 NAP scrape target. Default: `false`. |
-| `DEPLOY_ISTIO`                    | Set `true` to enable the managed Istio service mesh, AKS Managed Gateway API Standard-channel CRDs, and a Gateway API route. With observability enabled, the deployment also collects `istio_*` gateway metrics. |
+| `DEPLOY_ISTIO`                    | Set exact lowercase `true` to enable the managed Istio service mesh, the GA AKS Managed Gateway API installation, and a per-Gateway external ingress. With observability enabled, the deployment also collects `istio_*` gateway metrics. |
 | `SOURCE_REGISTRY`                 | Source container registry for images. Default: `ghcr.io/azure-samples`.                                                                                            |
+
+The Terraform deployment enables the standard Gateway API installation through the pinned AKS AVM module. The Bicep deployment does not currently configure Managed Gateway API. The postdeploy hook applies a `Gateway` and `HTTPRoute`; when observability is also exact lowercase `true`, its AMA job selects only the generated `pets` gateway pods by the standard gateway name and class labels and scrapes `/stats/prometheus` on port `15090`.
 
 These environment variables listed above can be set with commands like this:
 
@@ -147,7 +149,7 @@ azd env set DEPLOY_OBSERVABILITY_TOOLS true
 # enables AKS node auto provisioning
 azd env set DEPLOY_NODE_AUTO_PROVISIONING true
 
-# enables managed Istio and its external ingress gateway
+# enables managed Istio, Managed Gateway API, and per-Gateway external ingress
 azd env set DEPLOY_ISTIO true
 
 # set custom source registry (optional)
@@ -181,8 +183,9 @@ and the existing managed Istio control plane accepts `GatewayClass/istio`.
 The mutually exclusive App Routing Gateway API implementation stays explicitly
 disabled.
 Postdeploy waits for that class before applying
-`sample-manifests/istio/gateway-api.yaml`; the legacy Istio API manifest is
-retained only as a compatibility example and is not auto-applied.
+`sample-manifests/istio/gateway.yaml`; the alternate Gateway API and legacy
+Istio API manifests are retained only as compatibility examples and are not
+auto-applied.
 
 When observability and node auto provisioning are both enabled, postdeploy
 runs `azd-hooks/merge-ama-metrics-settings.py`. The helper performs a
