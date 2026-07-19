@@ -54,6 +54,12 @@ module "aks" {
     network_plugin_mode = "overlay"
     network_policy      = "cilium"
     network_dataplane   = "cilium"
+    advanced_networking = local.deploy_observability_tools ? {
+      enabled = true
+      observability = {
+        enabled = true
+      }
+    } : null
   }
 
   addon_profile_key_vault_secrets_provider = {
@@ -68,10 +74,12 @@ module "aks" {
   }
 
   azure_monitor_profile = local.deploy_observability_tools ? {
-    enabled = true
-    kube_state_metrics = {
-      metric_annotations_allow_list = "*"
-      metric_labels_allowlist       = "*"
+    metrics = {
+      enabled = true
+      kube_state_metrics = {
+        metric_annotations_allow_list = "*"
+        metric_labels_allowlist       = "*"
+      }
     }
   } : null
 
