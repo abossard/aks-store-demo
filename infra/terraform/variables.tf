@@ -26,6 +26,12 @@ variable "deploy_observability_tools" {
   default     = "false"
 }
 
+variable "deploy_node_auto_provisioning" {
+  description = "value to determine if AKS node auto provisioning should be enabled"
+  type        = string
+  default     = "false"
+}
+
 variable "deploy_azure_container_registry" {
   description = "value to determine if azure container registry should be deployed"
   type        = string
