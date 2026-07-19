@@ -1,0 +1,76 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: health-model-dns
+  labels:
+    app.kubernetes.io/managed-by: ahm-for-k8s
+    minime.virtucon.io/owned-by: ahm-for-k8s-live-smoke
+    minime.virtucon.io/sample: health-model
+spec:
+  activeDeadlineSeconds: 120
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: health-model-dns-probe
+        minime.virtucon.io/sample: health-model
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: dns
+          image: registry.k8s.io/e2e-test-images/agnhost:2.43@sha256:16bbf38c463a4223d8cfe4da12bc61010b082a79b4bb003e2d3ba3ece5dd5f9e
+          command:
+            - /bin/bash
+            - -ec
+          args:
+            - >-
+              for attempt in $(seq 1 20); do
+                getent hosts __DNS_PROBE_NAME__ >/dev/null || true;
+                sleep 1;
+              done
+          resources:
+            requests:
+              cpu: 5m
+              memory: 16Mi
+            limits:
+              cpu: 50m
+              memory: 64Mi
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: health-model-http
+  labels:
+    app.kubernetes.io/managed-by: ahm-for-k8s
+    minime.virtucon.io/owned-by: ahm-for-k8s-live-smoke
+    minime.virtucon.io/sample: health-model
+spec:
+  activeDeadlineSeconds: 120
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: health-model-http-probe
+        minime.virtucon.io/sample: health-model
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: http
+          image: busybox:1.37.0
+          command:
+            - /bin/sh
+            - -ec
+          args:
+            - >-
+              for attempt in $(seq 1 20); do
+                wget -q -O /dev/null
+                http://health-model-backend/health || true;
+                sleep 1;
+              done
+          resources:
+            requests:
+              cpu: 5m
+              memory: 8Mi
+            limits:
+              cpu: 50m
+              memory: 32Mi

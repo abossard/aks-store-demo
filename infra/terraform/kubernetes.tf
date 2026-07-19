@@ -11,7 +11,7 @@ module "acr" {
 // https://github.com/Azure/terraform-azurerm-avm-res-containerservice-managedcluster/
 module "aks" {
   source    = "Azure/avm-res-containerservice-managedcluster/azurerm"
-  version   = "0.6.1"
+  version   = "0.6.7"
   name      = "aks-${local.name}"
   parent_id = azurerm_resource_group.example.id
   location  = azurerm_resource_group.example.location
@@ -76,6 +76,20 @@ module "aks" {
           enabled = true
           mode    = "External"
         }]
+      }
+    }
+  } : null
+
+  ingress_profile = local.deploy_istio ? {
+    gateway_api = {
+      installation = "Standard"
+    }
+    web_app_routing = {
+      enabled = false
+      gateway_api_implementations = {
+        app_routing_istio = {
+          mode = "Disabled"
+        }
       }
     }
   } : null

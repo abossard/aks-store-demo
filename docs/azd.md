@@ -110,8 +110,8 @@ The following environment variables control what gets deployed:
 | `DEPLOY_AZURE_COSMOSDB`           | Set `true` to deploy Azure Cosmos DB (DocumentDB disabled in app).                                                                                                 |
 | `AZURE_COSMOSDB_ACCOUNT_KIND`     | Cosmos DB API kind: `MongoDB` or `GlobalDocumentDB` (SQL API). Default: `GlobalDocumentDB`.                                                                        |
 | `DEPLOY_OBSERVABILITY_TOOLS`      | Set `true` to deploy Log Analytics, managed Prometheus, and enable Container Insights. Also enables Advanced Container Networking Services (ACNS) network observability so Cilium/Hubble metrics flow to managed Prometheus. |
-| `DEPLOY_NODE_AUTO_PROVISIONING`   | Set `true` to enable AKS node auto provisioning in Auto mode with the default NodePools. Default: `false`.                                                         |
-| `DEPLOY_ISTIO`                    | Set `true` to enable the managed Istio service mesh and external ingress gateway. With observability enabled, the deployment also collects `istio_*` gateway metrics. |
+| `DEPLOY_NODE_AUTO_PROVISIONING`   | Set `true` to enable AKS node auto provisioning in Auto mode with the default NodePools. With observability enabled, postdeploy safely enables the official AMA schema-v2 NAP scrape target. Default: `false`. |
+| `DEPLOY_ISTIO`                    | Set `true` to enable the managed Istio service mesh, AKS Managed Gateway API Standard-channel CRDs, and a Gateway API route. With observability enabled, the deployment also collects `istio_*` gateway metrics. |
 | `SOURCE_REGISTRY`                 | Source container registry for images. Default: `ghcr.io/azure-samples`.                                                                                            |
 
 These environment variables listed above can be set with commands like this:
@@ -174,6 +174,37 @@ When you run the `azd up` command for the first time, you will be asked for a bi
 After you provide the information, `azd up` registers providers/features and installs required Azure CLI extensions. It then runs Terraform to provision Azure resources and deploys the app to AKS using a Helm chart. Workload identity is configured automatically for services that talk to Azure resources.
 
 This will take a few minutes to complete.
+
+When Istio is enabled, Terraform uses AKS Managed Gateway API rather than
+installing upstream CRDs. AKS lifecycle-manages the Standard-channel bundle,
+and the existing managed Istio control plane accepts `GatewayClass/istio`.
+The mutually exclusive App Routing Gateway API implementation stays explicitly
+disabled.
+Postdeploy waits for that class before applying
+`sample-manifests/istio/gateway-api.yaml`; the legacy Istio API manifest is
+retained only as a compatibility example and is not auto-applied.
+
+When observability and node auto provisioning are both enabled, postdeploy
+runs `azd-hooks/merge-ama-metrics-settings.py`. The helper performs a
+server-side dry-run and a `resourceVersion`-guarded field merge of only
+`schema-version`, `config-version` when absent, and
+`controlplane-metrics.node-auto-provisioning=true`. It preserves unrelated
+keys, annotations, labels, comments, `cluster_alias`, and the existing minimal
+ingestion choice. If minimal ingestion is explicitly disabled, it adds only
+the six official NAP metrics to the target keep-list.
+
+For an operator rollback, first verify that no Gateway API objects are in use
+before running `az aks update --disable-gateway-api`; disabling removes the
+managed CRDs and their stored objects. Restore AMA only from a same-run backup
+when the current state hash and `resourceVersion` still match. The live
+`ahm-for-k8s` setup harness automates those guarded rollback checks.
+
+Official current sources:
+
+- <https://learn.microsoft.com/azure/aks/managed-gateway-api>
+- <https://learn.microsoft.com/azure/aks/istio-gateway-api>
+- <https://learn.microsoft.com/azure/aks/control-plane-metrics-monitor>
+- <https://learn.microsoft.com/azure/azure-monitor/containers/prometheus-metrics-scrape-default>
 
 > [!NOTE]
 > Infra defaults to [Terraform](../infra/terraform). To use [Bicep](../infra/bicep) instead, open `azure.yaml` and change:

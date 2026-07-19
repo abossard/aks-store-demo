@@ -1,0 +1,33 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: health-model
+  labels:
+    app.kubernetes.io/managed-by: ahm-for-k8s
+    minime.virtucon.io/owned-by: ahm-for-k8s-live-smoke
+    minime.virtucon.io/sample: health-model
+spec:
+  gatewayClassName: __GATEWAY_CLASS__
+  listeners:
+    - name: http
+      port: 80
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: Same
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: health-model
+  labels:
+    app.kubernetes.io/managed-by: ahm-for-k8s
+    minime.virtucon.io/owned-by: ahm-for-k8s-live-smoke
+    minime.virtucon.io/sample: health-model
+spec:
+  parentRefs:
+    - name: health-model
+  rules:
+    - backendRefs:
+        - name: health-model-backend
+          port: 80
