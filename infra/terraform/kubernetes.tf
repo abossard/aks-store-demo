@@ -82,7 +82,8 @@ module "aks" {
   } : null
 
   service_mesh_profile = local.deploy_istio ? {
-    mode = "Istio"
+    mode  = "Istio"
+    istio = {}
   } : null
 
   addon_profile_key_vault_secrets_provider = {
