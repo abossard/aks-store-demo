@@ -43,11 +43,17 @@ module "aks" {
   }
 
   default_agent_pool = {
-    vm_size = local.aks_node_pool_vm_size
+    vm_size             = local.aks_node_pool_vm_size
+    enable_auto_scaling = false
     upgrade_settings = {
       max_surge = "10%"
     }
   }
+
+  node_provisioning_profile = local.deploy_node_auto_provisioning ? {
+    default_node_pools = "Auto"
+    mode               = "Auto"
+  } : null
 
   network_profile = {
     network_plugin      = "azure"
