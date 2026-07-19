@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ama-metrics-prometheus-config
+  namespace: kube-system
+data:
+  prometheus-config: |-
+    scrape_configs:
+      - job_name: store-front-gateway-external-istio
+        scheme: http
+        metrics_path: /stats/prometheus
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names:
+                - pets
+        relabel_configs:
+          - source_labels:
+              - __meta_kubernetes_pod_label_gateway_networking_k8s_io_gateway_name
+            action: keep
+            regex: store-front-gateway-external
+          - source_labels:
+              - __meta_kubernetes_pod_label_gateway_networking_k8s_io_gateway_class_name
+            action: keep
+            regex: istio
+          - source_labels:
+              - __meta_kubernetes_pod_phase
+            action: keep
+            regex: Running
+          - source_labels:
+              - __meta_kubernetes_pod_ip
+            target_label: __address__
+            replacement: $1:15090
+          - source_labels:
+              - __meta_kubernetes_pod_name
+            target_label: pod
+          - source_labels:
+              - __meta_kubernetes_namespace
+            target_label: namespace
+        metric_relabel_configs:
+          - source_labels:
+              - __name__
+            action: keep
+            regex: istio_.*

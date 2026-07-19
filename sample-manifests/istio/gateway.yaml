@@ -1,35 +1,31 @@
-apiVersion: networking.istio.io/v1alpha3
+apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: store-front-gateway-external
   namespace: pets
 spec:
-  selector:
-    istio: aks-istio-ingressgateway-external
-  servers:
-    - port:
-        number: 80
-        name: http
-        protocol: HTTP
-      hosts:
-        - "*"
+  gatewayClassName: istio
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: Same
 ---
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
 metadata:
-  name: store-front-vs-external
+  name: store-front-route-external
   namespace: pets
 spec:
-  hosts:
-    - "*"
-  gateways:
-    - store-front-gateway-external
-  http:
-    - match:
-        - uri:
-            prefix: ""
-      route:
-        - destination:
-            host: store-front.pets.svc.cluster.local
-            port:
-              number: 80
+  parentRefs:
+    - name: store-front-gateway-external
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: store-front
+          port: 80

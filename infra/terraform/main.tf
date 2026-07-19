@@ -73,6 +73,7 @@ locals {
   cosmosdb_account_kind           = var.cosmosdb_account_kind != "" ? var.cosmosdb_account_kind : local.default_cosmosdb_account_kind
   deploy_observability_tools      = var.deploy_observability_tools == "true" ? true : false
   deploy_node_auto_provisioning   = var.deploy_node_auto_provisioning == "true" ? true : false
+  deploy_istio                    = var.deploy_istio == "true" ? true : false
   deploy_azure_container_registry = var.deploy_azure_container_registry == "true" ? true : false
   deploy_azure_openai             = var.deploy_azure_openai == "true" ? true : false
   deploy_image_generation_model   = var.deploy_image_generation_model == "true" ? true : false
@@ -84,5 +85,4 @@ resource "azurerm_resource_group" "example" {
   name     = "rg-${local.name}"
   location = var.location
 }
-
 

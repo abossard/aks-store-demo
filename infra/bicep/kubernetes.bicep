@@ -45,9 +45,7 @@ module managedCluster 'br/public:avm/res/container-service/managed-cluster:0.9.0
       systemAssigned: true
     }
     publicNetworkAccess: 'Enabled'
-    authorizedIPRanges: [
-      currentIpAddress
-    ]
+    authorizedIPRanges: []
     roleAssignments: [
       {
         principalId: currentUserObjectId

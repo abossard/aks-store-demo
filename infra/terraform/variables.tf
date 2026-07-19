@@ -32,6 +32,12 @@ variable "deploy_node_auto_provisioning" {
   default     = "false"
 }
 
+variable "deploy_istio" {
+  description = "value to determine if the managed Istio service mesh should be deployed"
+  type        = string
+  default     = "false"
+}
+
 variable "deploy_azure_container_registry" {
   description = "value to determine if azure container registry should be deployed"
   type        = string
