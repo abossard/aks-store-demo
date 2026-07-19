@@ -54,6 +54,7 @@ infra:
 services:
   demo:
     host: aks
+    resourceName: ${AZURE_AKS_CLUSTER_NAME}
     k8s:
       namespace: pets
       service:
