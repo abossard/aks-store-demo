@@ -33,7 +33,7 @@ module "aks" {
   disable_local_accounts = true
 
   api_server_access_profile = {
-    authorized_ip_ranges = ["${chomp(data.http.current_ip.response_body)}/32"]
+    authorized_ip_ranges = []
   }
 
   aad_profile = {
