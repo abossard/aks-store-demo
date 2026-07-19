@@ -109,7 +109,7 @@ The following environment variables control what gets deployed:
 | `DEPLOY_AZURE_SERVICE_BUS`        | Set `true` to deploy Azure Service Bus (RabbitMQ disabled in app).                                                                                                 |
 | `DEPLOY_AZURE_COSMOSDB`           | Set `true` to deploy Azure Cosmos DB (DocumentDB disabled in app).                                                                                                 |
 | `AZURE_COSMOSDB_ACCOUNT_KIND`     | Cosmos DB API kind: `MongoDB` or `GlobalDocumentDB` (SQL API). Default: `GlobalDocumentDB`.                                                                        |
-| `DEPLOY_OBSERVABILITY_TOOLS`      | Set `true` to deploy Log Analytics, managed Prometheus, and enable Container Insights.                                                                             |
+| `DEPLOY_OBSERVABILITY_TOOLS`      | Set `true` to deploy Log Analytics, managed Prometheus, and enable Container Insights. Also enables Advanced Container Networking Services (ACNS) network observability so Cilium/Hubble metrics flow to managed Prometheus. |
 | `SOURCE_REGISTRY`                 | Source container registry for images. Default: `ghcr.io/azure-samples`.                                                                                            |
 
 These environment variables listed above can be set with commands like this:
